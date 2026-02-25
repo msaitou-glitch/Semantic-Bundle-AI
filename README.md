@@ -20,3 +20,7 @@ The theoretical framework, mathematical formulations, and documentation provided
 
 ---
 **Commercial Inquiries:** For implementation details, partnership, or commercial licensing, please contact me through GitHub Issues or via the contact info on my SSRN profile.
+### 💬 Community & Contact
+If you have questions, feedback, or interest in collaboration, please feel free to:
+- **Open an Issue:** For public discussions and technical questions.
+- **Direct Contact:** (Optional: ここにメールアドレスを載せるか、SSRNのプロフィール経由でと書く)
