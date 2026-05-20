@@ -206,16 +206,28 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Project-specific private files
+# =============================================================
+# Project: 非公開ファイル
+# =============================================================
 logs/
 private-specs/
 docs/meta/CLAUDE.md
+papers/
 *.pub
 xserver_claude
 index_hp.html
-papers/
-main_paper2.*
-main.*
-restructure.bat
-paper2_02_results.png
-paper2_02_results_final.png
+*.bat
+*.png
+main*.tex
+main*.pdf
+main*.aux
+main*.bbl
+main*.blg
+main*.log
+main*.out
+
+# =============================================================
+# Project: 公開ファイル（上記ルールの例外）
+# notebooks/ 配下の .ipynb と .png のみ公開
+# =============================================================
+!notebooks/*.png
