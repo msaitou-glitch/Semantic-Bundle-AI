@@ -212,6 +212,9 @@ __marimo__/
 logs/
 private-specs/
 docs/meta/CLAUDE.md
+docs/ops/outreach.md
+docs/ops/research_strategy.md
+docs/core/theory_map.md
 papers/
 *.pub
 xserver_claude
