@@ -101,7 +101,7 @@ Then open any notebook in `notebooks/`:
 | Paper | Description | Link |
 |-------|-------------|------|
 | Paper 0 | Theoretical framework | [SSRN 6139446](https://ssrn.com/abstract=6139446) |
-| Paper 1 | PoC empirical results | [SSRN 6794818](https://ssrn.com/abstract=6794818) |
+| Paper 1 | PoC empirical results | Coming soon (under review) |
 
 ---
 
