@@ -100,8 +100,8 @@ Then open any notebook in `notebooks/`:
 
 | Paper | Description | Link |
 |-------|-------------|------|
-| Paper 0 | Theoretical framework | [SSRN 6139446](https://ssrn.com/abstract=6139446) |
-| Paper 1 | PoC empirical results | Coming soon (under review) |
+| Paper 0 | Theoretical framework | [10.5281/zenodo.20417222](https://doi.org/10.5281/zenodo.20417222) |
+| Paper 1 | PoC empirical results | [10.5281/zenodo.20417714](https://doi.org/10.5281/zenodo.20417714) |
 
 ---
 
