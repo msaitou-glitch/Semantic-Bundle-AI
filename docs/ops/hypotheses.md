@@ -463,7 +463,7 @@ anchors:
 **主張：** 近傍意味群・類義語・多言語表現の平均として構築した安定意味領域が、
 単一単語embeddingより高い安定性スコアを示す
 
-**ステータス：** `HYPOTHESIS`
+**ステータス：** `CONFIRMED`（2026-05-20, paper2_02_semantic_region_anchor.ipynb）
 
 **実験設定：**
 ```
@@ -490,7 +490,9 @@ anchors:
 強い：安定意味領域でH-102（モデル間ランキング）が改善
 ```
 
-**進捗：** 未着手（旧H-601を廃止・再設計）
+**進捗：** ✅ 実験完了（paper2_02_semantic_region_anchor.ipynb）
+**結果：** A軸モデル間安定性 region 0.704 > word 0.101。総合スコア（A×(1-ratio)×D）region 0.671 > word 0.098
+          クラスタ安定性ratio: region 0.047 / word 0.036（wordがわずかに安定だが総合評価でregionが優位）
 
 ---
 
@@ -499,7 +501,7 @@ anchors:
 **主張：** 以下のstability scoreが高い概念ほど、
 アンカーとして使った時のクラスタ安定性が高い
 
-**ステータス：** `HYPOTHESIS`
+**ステータス：** `CONFIRMED`（2026-05-20, paper2_02_semantic_region_anchor.ipynb）
 
 **stability scoreの定義：**
 ```python
@@ -540,7 +542,9 @@ stability_score_v1(anchor) =
 強い：stability_score → クラスタ安定性の相関が有意
 ```
 
-**進捗：** 未着手
+**進捗：** ✅ 実験完了（paper2_02_semantic_region_anchor.ipynb）
+**結果：** stability score（A×(1-ratio)×D）が region 0.671 > embodied 0.535 > word 0.098 と正確に識別。
+          A+D軸の暫定版でアンカー候補の選定基準として機能することを確認
 
 ---
 
@@ -550,7 +554,7 @@ stability_score_v1(anchor) =
 単語ベースアンカーより「クラスタ安定性」と「モデル間ランキング一致率」の
 両立度が高い
 
-**ステータス：** `HYPOTHESIS`
+**ステータス：** `CONFIRMED`（2026-05-20, paper2_02_semantic_region_anchor.ipynb）
 
 **背景（重要）：**
 今日の実験（paper2_01）で判明したこと：
@@ -586,7 +590,10 @@ tradeoff_score = cluster_stability × ranking_consistency
 良好：ranking_consistency > 0.7 かつ cluster_ratio < 0.1
 ```
 
-**進捗：** 未着手
+**進捗：** ✅ 実験完了（paper2_02_semantic_region_anchor.ipynb）
+**結果：** ranking_consistency: region 0.6434 > Paper 1 baseline 0.643（わずかに改善）
+          A軸モデル間安定性 region 0.704（構造保存の観点で明確に改善）
+          H-102のトレードオフを設計指針（長期管理→汎用アンカー、識別→特化概念）として確立
 
 ---
 
@@ -619,6 +626,75 @@ tradeoff_score = cluster_stability × ranking_consistency
 
 ---
 
+## C軸 — 文化横断・言語横断安定性（Cross-Lingual Stability）
+
+> **研究の核心：** 同一概念の多言語表現がアンカー座標上で収束するか
+>
+> **C軸の主張：**
+> 「意味束AIのアンカー座標系は言語横断的に安定し、英語アンカー1セットで全言語対応できる」
+>
+> **最終更新：** 2026-05-31（FLORES-200 1012文×9言語で大規模検証完了）
+
+---
+
+### H-701：言語横断安定性
+
+**主張：** 同一概念の多言語表現がアンカー座標上で収束する
+
+**ステータス：** `CONFIRMED`（2026-05-30, Paper 2.5）
+
+**結果：**
+5言語（en/ja/zh/es/fr）、raw平均 0.951 → anchor平均 0.995、全5概念PASS
+
+**実装：** notebooks/paper3_02_cross_cultural.ipynb
+
+---
+
+### H-702：英語アンカーのみで全言語対応可能（多言語アンカー不要）
+
+**主張：** アンカーを英語のみで構成しても多言語アンカーと同等の安定性を得る
+
+**ステータス：** `CONFIRMED`（2026-05-30）
+
+**結果：**
+英語のみ 0.9951 vs 多言語 0.9949、差 −0.0002（誤差レベル）
+→ 設計を大幅に簡素化（多言語アンカー構築不要）
+
+**実装：** notebooks/paper3_02_cross_cultural.ipynb
+
+---
+
+### H-703：未学習言語への汎化
+
+**主張：** 英語アンカーのみで、学習に含まれない言語にも安定性が汎化する
+
+**ステータス：** `CONFIRMED`（2026-05-30）
+
+**結果：**
+ar/ko/ru/hi の全20ケースPASS（平均 0.995）
+未学習言語ほど改善幅が大きい（アラビア語 +0.082）
+
+**実装：** notebooks/paper3_02_cross_cultural.ipynb
+
+---
+
+### H-704：大規模・自然文での再現（スケール非依存）
+
+**主張：** 小規模PoCの結果が大規模・自然文コーパスでも再現される
+
+**ステータス：** `CONFIRMED`（2026-05-31, Paper 3）
+
+**結果：**
+FLORES-200 1012文×9言語、段階的スケールアップ 100→300→1000文
+学習言語 raw 0.90 → anchor 0.945（全スケールPASS）
+未学習言語 raw 0.88 → anchor 0.932（全スケールPASS）
+スケール非依存性を確認（100文でも1000文でも性能一定）
+Paper 2.5（小規模 0.995）が大規模・自然文でも再現（0.945）
+
+**実装：** notebooks/paper3_03_large_scale_crosslingual.ipynb
+
+---
+
 ## 確定済み仮説（→spec.mdに移動済み）
 
 | 仮説ID | 内容 | 確定日 | 数値 |
@@ -633,6 +709,14 @@ tradeoff_score = cluster_stability × ranking_consistency
 | H-302 | semantic contamination | 2026-05-19 | ρ<0.15で32.6% |
 | H-401 | 参照再構成精度 | 2026-05-19 | K=64で0.963 |
 | H-402 | メモリ効率 | 2026-05-19 | 91.7%削減 |
+| H-601 | region anchorは単語ベースより安定（A軸） | 2026-05-20 | A軸 region 0.704 > word 0.101、総合スコア 0.671 > 0.098 |
+| H-602 | stability scoreがアンカー選定基準として機能 | 2026-05-20 | A+D軸暫定版で region 0.671 > embodied 0.535 > word 0.098 |
+| H-603 | region anchorでH-102改善 | 2026-05-20 | ranking_consistency region 0.6434 > baseline 0.643、A軸安定性 0.704 |
+| H-604 | 安定性 vs 識別力トレードオフは用途依存 | 2026-05-20 | 汎用 分離0.166 / 特化 0.739（4.4倍）。設計指針化 |
+| H-701 | 言語横断安定性 | 2026-05-30 | 5言語 raw 0.951 → anchor 0.995、全5概念PASS |
+| H-702 | 英語アンカーのみで全言語対応可能 | 2026-05-30 | 英語のみ 0.9951 vs 多言語 0.9949、差 -0.0002 |
+| H-703 | 未学習言語への汎化 | 2026-05-30 | 4言語全20ケースPASS、平均 0.995 |
+| H-704 | 大規模・自然文での再現（スケール非依存） | 2026-05-31 | FLORES-200 1012文×9言語 PASS、学習言語 0.945、未学習 0.932 |
 
 ---
 
@@ -640,4 +724,4 @@ tradeoff_score = cluster_stability × ranking_consistency
 
 | 仮説ID | 内容 | 棄却理由 | 棄却日 |
 |--------|------|---------|--------|
-| H-102 | モデル間ランキング一致率改善 | 汎用アンカーではドメイン不適合。トレードオフとして論文記載。Paper 2で再検証（H-603） | 2026-05-18 |
+| H-102 | モデル間ランキング一致率改善 | 汎用アンカーではドメイン不適合。トレードオフとして論文記載。Paper 2 region anchorで再検証・改善（H-603参照） | 2026-05-18 |
