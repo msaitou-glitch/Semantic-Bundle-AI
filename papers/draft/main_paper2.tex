@@ -1,0 +1,409 @@
+\documentclass[11pt,a4paper]{article}
+
+% === Packages =============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{cite}
+\usepackage{microtype}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+% === Title ===============================================
+\title{
+  \textbf{Semantic Bundle AI: Anchor Design and Stability Framework} \\[0.5em]
+  \large Stable Semantic Regions, Domain Discriminability, \\
+  and a Four-Axis Evaluation Framework for Semantic Stability
+}
+
+\author{
+  M. Saitou \\
+  \textit{ON THE SHOULDERS OF GIANTS PROJECT} \\
+  \texttt{m.saitou@ontheshouldersofgiants.jp}
+}
+
+\date{May 2026\thanks{This work is licensed under CC BY-NC-ND 4.0.
+\url{https://creativecommons.org/licenses/by-nc-nd/4.0/}}}
+
+% === Body ================================================
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Semantic Bundle AI introduces stable anchor-based coordinates as a
+complementary semantic management layer for Large Language Models
+\cite{saitou2026semantic, saitou2026poc}. A key open question from
+prior work concerns anchor design: what constitutes an effective anchor,
+and how should anchors be selected?
+
+This paper addresses that question through two experiments. First, we
+demonstrate that anchors constructed as \textit{stable semantic regions}
+--- averaged embeddings of meaning-neighbor clusters rather than single
+words --- achieve substantially higher inter-model stability than
+word-level anchors (Spearman $r = 0.704$ vs.\ $0.101$, a 7$\times$
+improvement). Second, we identify a fundamental tradeoff between cluster
+stability and domain discriminability: generic anchors excel at
+intra-cluster cohesion (variance ratio $0.047$--$0.067$), while
+domain-specific concept vectors achieve $4.4\times$ higher inter-domain
+separation ($0.739$ vs.\ $0.166$). We propose a four-axis evaluation
+framework for semantic stability --- inter-model consistency, temporal
+consistency, cross-cultural robustness, and perturbation resistance ---
+and provide initial validation on two axes. These results establish
+concrete design principles for anchor selection and position semantic
+stability as an empirically tractable research program.
+\end{abstract}
+
+% --------------------------------------------------------
+\section{Introduction}
+\label{sec:intro}
+
+Prior work on Semantic Bundle AI established the theoretical framework
+\cite{saitou2026semantic} and provided initial empirical validation across
+four axes: anchor coordinate stability, longitudinal consistency, edit
+locality, and compression efficiency \cite{saitou2026poc}. A central
+finding was that anchor coordinates reduce intra-cluster variance to 5.2\%
+of raw embedding variance, while bundle updates reduce semantic drift by
+38.6\% over ten sequential updates.
+
+However, a critical question was left open: \textit{how should anchors be
+designed?} The prior work used generic concept words (time, space, risk,
+rule, trust, number, body, emotion) without systematic justification. The
+failure of hypothesis H-102 --- cross-model ranking consistency did not
+improve under anchor projection --- suggested that anchor design may be
+the limiting factor.
+
+This paper addresses anchor design through two lines of investigation:
+
+\begin{enumerate}
+\item \textbf{Anchor representation}: Should anchors be single words or
+richer semantic structures? We compare word-level anchors, stable semantic
+region anchors (meaning-neighbor clusters), and embodied cognition anchors
+(body-based conceptual primitives).
+
+\item \textbf{Stability--discriminability tradeoff}: Is there a fundamental
+tradeoff between using anchors for intra-cluster cohesion versus
+inter-domain separation? We characterize this tradeoff and derive
+application-specific design recommendations.
+\end{enumerate}
+
+We further propose a four-axis framework for semantic stability evaluation,
+providing a principled structure for future research.
+
+% --------------------------------------------------------
+\section{Background}
+\label{sec:background}
+
+\subsection{Anchor Design in Semantic Spaces}
+
+The concept of using reference points to stabilize semantic representations
+has appeared in several contexts. Procrustes alignment \cite{smith2017offline}
+uses reference words to align embedding spaces across languages. Diachronic
+embedding studies \cite{hamilton2016diachronic} use stable landmark words
+to track semantic change over time. These approaches treat anchors as
+single words selected by frequency or stability criteria.
+
+Semantic Bundle AI differs in motivation: anchors are not used for
+cross-lingual alignment or drift measurement, but as an ongoing coordinate
+reference for semantic management. This distinction has implications for
+anchor design that have not been previously explored.
+
+\subsection{Embodied Cognition and Semantic Stability}
+
+A theoretical motivation for body-based anchor selection comes from
+embodied cognition research \cite{lakoff1999philosophy}, which argues
+that abstract concepts are grounded in sensorimotor experience. Concepts
+such as temperature (hot/cold), proximity (near/far), and verticality
+(up/down) are hypothesized to be more cross-culturally stable because
+they are anchored in shared human embodiment. This motivates testing
+whether embodied concept clusters yield more stable anchors.
+
+\subsection{Semantic Region vs.\ Word-Level Representation}
+
+Rather than treating anchors as individual word vectors, we propose
+constructing anchors as \textit{stable semantic regions}: averaged
+embeddings of meaning-neighbor clusters that include synonyms,
+multilingual equivalents, and contextually related terms. This is
+motivated by the observation that single-word embeddings are sensitive
+to tokenization, frequency, and context, while averaged representations
+over semantic neighborhoods tend to be more stable \cite{wieting2016towards}.
+
+% --------------------------------------------------------
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Models}
+
+All experiments use two pre-trained sentence embedding models without
+modification: \texttt{all-mpnet-base-v2} ($d = 768$) and
+\texttt{all-MiniLM-L6-v2} ($d = 384$) from the
+\texttt{sentence-transformers} library \cite{reimers2019sentence}.
+
+\subsection{Anchor Types}
+
+We compare three anchor construction strategies, each with 8 anchors:
+
+\textbf{Word anchors}: Single-word embeddings for generic concepts
+(time, space, risk, rule, trust, number, body, emotion).
+
+\textbf{Semantic region anchors}: Each anchor is the mean embedding of
+10 semantically related terms spanning synonyms and multilingual
+equivalents. For example, the \textit{danger} anchor averages embeddings
+of \{danger, risk, unsafe, hazardous, threat, \textit{kiken}, \textit{risuku}, harm, peril,
+jeopardy\}.
+
+\textbf{Embodied anchors}: Each anchor is the mean embedding of 10
+body-based conceptual primitives. Eight embodied concepts are used:
+hot/cold, near/far, up/down, heavy/light, safe/danger, fast/slow,
+many/few, past/future.
+
+\subsection{Evaluation Metrics}
+
+\textbf{A-axis (inter-model stability)}: Spearman rank correlation
+between the pairwise similarity matrices of anchor embeddings computed
+by the two models. High values indicate that the relational structure
+among anchors is preserved across models.
+
+\textbf{Cluster stability} (H-101 equivalent): Ratio of intra-cluster
+variance in anchor coordinate space to raw embedding space for a
+synonym group of 15 sentences. Lower values indicate tighter clustering.
+
+\textbf{D-axis (perturbation resistance)}: Correlation between full and
+anchor-reduced coordinate representations when one anchor is removed.
+Values near 1.0 indicate robustness to anchor removal.
+
+\textbf{H-603 (ranking consistency)}: Spearman rank correlation of
+nearest-neighbor rankings between the two models in anchor coordinate
+space, following the H-102 protocol from \cite{saitou2026poc}.
+
+\subsection{Domain Discriminability Experiment}
+
+We construct four domain datasets of 20 sentences each: information
+security, medical, legal, and general. Two anchor types are compared
+for domain discriminability: generic word anchors and domain-specific
+concept vectors. Inter-domain separation is measured as the mean
+Euclidean distance between domain centroids in coordinate space.
+
+% --------------------------------------------------------
+\section{Results}
+\label{sec:results}
+
+\subsection{Anchor Type Comparison}
+
+Table~\ref{tab:anchor_comparison} summarizes results across all metrics
+for the three anchor types.
+
+\begin{table}[h]
+\centering
+\caption{Comparison of anchor types across evaluation metrics.}
+\label{tab:anchor_comparison}
+\begin{tabular}{lrrrr}
+\toprule
+Anchor type & A-axis & Cluster ratio & D-axis & H-603 \\
+\midrule
+Word (single)         & 0.101 & \textbf{0.036} & 1.000 & 0.617 \\
+Semantic region       & \textbf{0.704} & 0.047 & 1.000 & 0.643$^\dagger$ \\
+Embodied (body-based) & 0.559 & 0.042 & 1.000 & 0.596 \\
+\midrule
+Paper 1 baseline      & ---   & 0.052 & ---   & 0.572--0.643 \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\noindent{\footnotesize $^\dagger$ H-603 for semantic region matches the Paper~1 baseline upper bound (no improvement).}
+\end{table}
+
+Several findings emerge. First, semantic region anchors achieve
+substantially higher inter-model stability (A-axis: $0.704$) compared
+to word anchors ($0.101$), a $7\times$ improvement. Embodied anchors
+occupy an intermediate position ($0.559$). Second, cluster stability
+(variance ratio) is comparable across all three types ($0.036$--$0.047$),
+suggesting that cluster cohesion is relatively insensitive to anchor
+construction strategy. Third, perturbation resistance (D-axis) is
+perfect ($1.000$) for all types, replicating the H-103/H-104 findings
+from \cite{saitou2026poc}. Fourth, H-603 ranking consistency for semantic region anchors
+($0.643$) matches, without exceeding, the upper bound of the Paper 1 baseline range,
+while word anchors fall below it ($0.617$); anchor projection thus does not improve
+ranking consistency over the baseline.
+
+Results are shown in Figure~\ref{fig:anchor_comparison}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{figures/paper2_02_results_final.png}
+  \caption{Anchor type comparison. \textit{Left}: Cross-model ranking
+  consistency (H-603). \textit{Right}: All metrics comparison. Semantic
+  region anchors (blue) lead on inter-model stability; among the three
+  anchor types they also rank highest on ranking consistency, which
+  nonetheless remains at the Paper~1 baseline level, while all types
+  achieve comparable cluster stability and perfect perturbation resistance.}
+  \label{fig:anchor_comparison}
+\end{figure}
+
+\subsection{Stability--Discriminability Tradeoff}
+
+Table~\ref{tab:tradeoff} and Figure~\ref{fig:tradeoff} show results for
+the stability--discriminability comparison across domains.
+
+\begin{table}[h]
+\centering
+\caption{Stability vs.\ discriminability for generic vs.\ domain-specific anchors.}
+\label{tab:tradeoff}
+\begin{tabular}{lrr}
+\toprule
+Anchor type & Cluster stability (ratio) & Inter-domain separation \\
+\midrule
+Generic (word)        & \textbf{0.047--0.067} & 0.166 \\
+Domain-specific       & 0.110--0.235          & \textbf{0.739} \\
+\midrule
+Improvement           & $\times$0.3--0.5 worse & $\times$4.4 better \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Generic anchors achieve lower cluster variance ratios ($0.047$--$0.067$)
+than domain-specific concept vectors ($0.110$--$0.235$), indicating
+better intra-cluster cohesion. However, domain-specific vectors achieve
+$4.4\times$ higher inter-domain separation ($0.739$ vs.\ $0.166$).
+This tradeoff is consistent across all four domains tested.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{figures/paper2_01_results.png}
+  \caption{Stability--discriminability tradeoff. \textit{Left}: Cluster
+  stability ratios by domain and anchor type. \textit{Center}: Inter-domain
+  separation scores. \textit{Right}: Tradeoff scatter plot showing generic
+  anchors (blue) favoring stability and domain-specific vectors (orange)
+  favoring discriminability.}
+  \label{fig:tradeoff}
+\end{figure}
+
+% --------------------------------------------------------
+\section{A Four-Axis Framework for Semantic Stability}
+\label{sec:framework}
+
+Based on the experimental findings, we propose organizing semantic
+stability evaluation around four axes:
+
+\begin{equation}
+\text{stability\_score}(a_i) =
+  w_1 \cdot \text{inter\_model}(a_i) +
+  w_2 \cdot \text{temporal}(a_i) +
+  w_3 \cdot \text{cross\_cultural}(a_i) +
+  w_4 \cdot \text{perturbation}(a_i)
+\label{eq:stability}
+\end{equation}
+
+\textbf{A. Inter-model consistency}: Preservation of relational structure
+across embedding models (validated in this work: $r = 0.704$ for semantic
+region anchors).
+
+\textbf{B. Temporal consistency}: Preservation of anchor position under
+model updates and fine-tuning (partially validated in \cite{saitou2026poc}
+via longitudinal bundle updates).
+
+\textbf{C. Cross-cultural robustness}: Preservation of relational structure
+across languages and cultural contexts (left for future work).
+
+\textbf{D. Perturbation resistance}: Robustness to anchor removal and noise
+injection (validated: $1.000$ across all anchor types).
+
+The key contribution of this framework is to transform semantic stability
+from an informal notion into an empirically tractable, multi-dimensional
+evaluation problem. Axes B and C remain open research questions, providing
+a structured agenda for future work.
+
+% --------------------------------------------------------
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Design Principles for Anchor Selection}
+
+The results support two practical design principles:
+
+\textbf{Principle 1: Use semantic regions, not single words.}
+Averaging over meaning-neighbor clusters yields $7\times$ higher
+inter-model stability without sacrificing cluster cohesion or
+perturbation resistance.
+
+\textbf{Principle 2: Match anchor type to application.}
+For applications requiring long-term semantic consistency (memory
+management, concept tracking), generic anchors with lower cluster
+variance ratios are preferable. For applications requiring domain
+discrimination (classification, retrieval), domain-specific concept
+vectors provide substantially higher inter-domain separation.
+
+\subsection{Relationship to Embodied Cognition}
+
+Embodied anchors occupy an intermediate position on all metrics,
+suggesting partial support for the embodied cognition motivation.
+They outperform word anchors substantially on inter-model stability
+($0.559$ vs.\ $0.101$) but do not reach semantic region performance
+($0.704$). This may reflect that body-based concepts, while cognitively
+grounded, do not form as tight semantic neighborhoods in embedding
+space as explicitly constructed meaning clusters. Further investigation
+with larger embodied concept inventories is warranted.
+
+\subsection{Implications for the H-102 Failure}
+
+The H-102 failure in \cite{saitou2026poc} --- cross-model ranking
+consistency did not improve under anchor projection --- can now be
+partially explained. Word-level anchors impose an unstable inter-model
+coordinate system ($r = 0.101$), whereas semantic region anchors are
+far more stable ($r = 0.704$). This greater anchor stability is
+associated with a modest gain in ranking consistency across anchor types
+($0.617 \to 0.643$). However, even the most stable anchors only match
+the upper bound of the Paper~1 baseline range ($0.643$) without
+exceeding it; anchor design alone therefore does not recover cross-model
+ranking consistency. The H-102 limitation persists and is consistent
+with the cluster-stability/ranking tradeoff imposed by low-dimensional
+anchor projection, rather than being resolved by anchor design.
+
+\subsection{Limitations}
+
+The current experiments use small datasets (15--20 sentences per domain)
+and two embedding models. Axes B (temporal) and C (cross-cultural) of
+the stability framework remain unvalidated. The weight parameters $w_i$
+in Equation~\ref{eq:stability} are not yet determined empirically.
+Large-scale validation across more models, languages, and domains is
+required before deployment recommendations can be made with confidence.
+
+% --------------------------------------------------------
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented two experiments addressing anchor design for Semantic
+Bundle AI. Semantic region anchors --- constructed as averaged embeddings
+of meaning-neighbor clusters --- achieve $7\times$ higher inter-model
+stability than word-level anchors while maintaining comparable cluster
+cohesion and perfect perturbation resistance. A fundamental
+stability--discriminability tradeoff is identified: generic anchors
+favor intra-cluster cohesion, while domain-specific concept vectors
+achieve $4.4\times$ higher inter-domain separation.
+
+We propose a four-axis framework for semantic stability evaluation,
+providing initial validation on two axes and a structured agenda for
+future work. Together, these results establish anchor design as a
+tractable subproblem within the broader Semantic Bundle AI research
+program, and provide concrete principles for practical anchor selection.
+
+% --------------------------------------------------------
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
