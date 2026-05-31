@@ -175,7 +175,7 @@ hypotheses.md: 「bundle < baseline」→ 平均値で確認 ✅ 一致
 |-------|------|--------|------|----------------------|
 | H-601 | region anchor が word より安定 | A軸: region **0.704** > word **0.101**、総合スコア: region **0.671** > word **0.098** | ✅ CONFIRMED | ✅ 一致 |
 | H-602 | stability score がアンカー選定基準として機能 | region 0.671 > embodied 0.535 > word 0.098 と正確に識別 | ✅ CONFIRMED（A+D軸暫定版） | ✅ 一致 |
-| H-603 | region anchor で H-102 改善 | ranking_consistency region **0.6434** > Paper 1 baseline **0.643** | ✅ CONFIRMED（わずかに改善） | ranking_consistency 0.6434 / A軸安定性 0.704 は別指標 ✅ 正確に記録済み |
+| H-603 | region anchor の trade-off score 達成（最低ライン） | ranking_consistency region **0.6434** ≈ baseline **0.643**（+0.0004、横ばい）。良好ライン（>0.7）未達。価値は A軸 inter-model stability **0.704**（H-601）にある | ✅ CONFIRMED（最低ライン / 良好ライン未達） | ranking_consistency は改善とは言えない ✅ 正確に記録済み |
 
 **参考（Paper 1 baseline）：** ranking_consistency: 0.572〜0.643（poc_01 v1:0.5723、v2:0.6429）
 
@@ -273,7 +273,8 @@ hypotheses.md: 「bundle < baseline」→ 平均値で確認 ✅ 一致
 | **A軸** | モデル間安定性（各モデル空間内でアンカーが安定参照系になるか） | H-601, H-603 | region A軸 0.704、ranking_consistency 0.6434 | paper2_02_semantic_region_anchor |
 | **B軸** | 時系列安定性（同一モデル内での逐次更新に対する安定性） | H-201, H-202, H-203 | drift 38.6%削減、整合性 0.9313（10ステップ後） | poc_02_longitudinal |
 | **C軸** | 文化横断安定性（同一モデル・多言語での安定性） | H-701, H-702, H-703, H-704 | 5言語 0.995、英語アンカーで全言語対応（差-0.0002）、1012文PASS 0.945 | paper3_02, paper3_03 |
-| **D軸** | 摂動耐性（アンカー除去・ノイズ追加への耐性） | H-103, H-104, H-301, H-302 | 除去耐性1.0000、ノイズ劣化0.00%、汚染ρ=0.1で32.6% | poc_01, poc_03 |
+| **D軸** | 摂動耐性（アンカー除去・ノイズ追加への耐性） | H-103, H-104 | 除去耐性1.0000（k=1,2）、ノイズ劣化0.00%（1〜2個追加） | poc_01_anchor_stability |
+| **PoC③** | 編集局所化（bundle更新の影響範囲抑制） | H-301, H-302 | H-301: 平均 0.0206 < 0.0210（薄いPASS、5束中3束は個別FAIL）。H-302: ρ=0.1で32.6%（ρ<0.15推奨） | poc_03_edit_locality |
 
 ---
 

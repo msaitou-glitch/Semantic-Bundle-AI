@@ -554,7 +554,7 @@ stability_score_v1(anchor) =
 単語ベースアンカーより「クラスタ安定性」と「モデル間ランキング一致率」の
 両立度が高い
 
-**ステータス：** `CONFIRMED`（2026-05-20, paper2_02_semantic_region_anchor.ipynb）
+**ステータス：** `CONFIRMED（最低ライン達成 / 良好ライン未達）`（2026-05-20, paper2_02_semantic_region_anchor.ipynb）
 
 **背景（重要）：**
 今日の実験（paper2_01）で判明したこと：
@@ -591,9 +591,13 @@ tradeoff_score = cluster_stability × ranking_consistency
 ```
 
 **進捗：** ✅ 実験完了（paper2_02_semantic_region_anchor.ipynb）
-**結果：** ranking_consistency: region 0.6434 > Paper 1 baseline 0.643（わずかに改善）
-          A軸モデル間安定性 region 0.704（構造保存の観点で明確に改善）
-          H-102のトレードオフを設計指針（長期管理→汎用アンカー、識別→特化概念）として確立
+**結果：**
+ranking_consistency: region **0.6434** ≈ Paper 1 baseline **0.643**（差 +0.0004、横ばいで改善とは言えない）。
+8次元圧縮による ranking 劣化（H-102トレードオフ）は region anchor でも解消されない＝設計通り。
+region anchor の価値は ranking_consistency ではなく A軸 inter-model stability **0.704**（H-601参照）にある。
+
+- 最低ライン：trade-off score region **0.671** > word **0.098** → ✅ 達成
+- 良好ライン：ranking_consistency > 0.7 → ❌ 未達（0.6434）
 
 ---
 
@@ -705,13 +709,13 @@ Paper 2.5（小規模 0.995）が大規模・自然文でも再現（0.945）
 | H-201 | bundle更新のdrift削減 | 2026-05-19 | 38.6%削減 |
 | H-202 | semantic collapse率 | 2026-05-19 | 0% |
 | H-203 | 整合性スコア維持 | 2026-05-19 | 0.931 |
-| H-301 | 編集影響局所化 | 2026-05-19 | bundle < baseline |
+| H-301 | 編集影響局所化 | 2026-05-19 | 平均 bundle 0.0206 < baseline 0.0210（薄いPASS）。5束中3束は個別FAIL。locality score（比率）は notebook 未出力、要実計算 |
 | H-302 | semantic contamination | 2026-05-19 | ρ<0.15で32.6% |
 | H-401 | 参照再構成精度 | 2026-05-19 | K=64で0.963 |
 | H-402 | メモリ効率 | 2026-05-19 | 91.7%削減 |
 | H-601 | region anchorは単語ベースより安定（A軸） | 2026-05-20 | A軸 region 0.704 > word 0.101、総合スコア 0.671 > 0.098 |
 | H-602 | stability scoreがアンカー選定基準として機能 | 2026-05-20 | A+D軸暫定版で region 0.671 > embodied 0.535 > word 0.098 |
-| H-603 | region anchorでH-102改善 | 2026-05-20 | ranking_consistency region 0.6434 > baseline 0.643、A軸安定性 0.704 |
+| H-603 | region anchorのtrade-off score達成（最低ライン） | 2026-05-20 | ranking_consistency 0.6434 ≈ baseline 0.643（横ばい）。価値はA軸安定性 0.704（H-601）にある |
 | H-604 | 安定性 vs 識別力トレードオフは用途依存 | 2026-05-20 | 汎用 分離0.166 / 特化 0.739（4.4倍）。設計指針化 |
 | H-701 | 言語横断安定性 | 2026-05-30 | 5言語 raw 0.951 → anchor 0.995、全5概念PASS |
 | H-702 | 英語アンカーのみで全言語対応可能 | 2026-05-30 | 英語のみ 0.9951 vs 多言語 0.9949、差 -0.0002 |
