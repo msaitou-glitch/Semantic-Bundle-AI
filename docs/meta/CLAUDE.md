@@ -267,6 +267,13 @@ confidence: float  # 0.0 to 1.0
 ---
 ## OSG統合本部 共通方針（2026-05-23追記）
 
+### 著者情報
+- 著者名：M. Saitou
+- ORCID iD：0009-0009-0865-8193
+- ORCID URL：https://orcid.org/0009-0009-0865-8193
+- 所属：ON THE SHOULDERS OF GIANTS PROJECT
+- メール：m.saitou@ontheshouldersofgiants.jp
+
 ### ブランド理念（Section 7）
 - 社名：On the Shoulders of Giants / 略称：gAIants
 - 理念：世界の構造を再定義する
